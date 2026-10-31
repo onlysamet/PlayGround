@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#050711" />
+  <meta name="description" content="PRISMA: her hafta aynı altı ışık bulmacası, sıra tabanlı oynanış ve haftalık skor ligi. Aynaları döndür, ışını kristallere ulaştır." />
+  <title>PRISMA — Haftalık Işık Ligi</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="bg-layer" aria-hidden="true">
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+    <div class="bg-grid"></div>
+    <div class="bg-vignette"></div>
+  </div>
+
+  <div class="app">
+    <header class="topbar" inert>
+      <a class="brand" href="./" aria-label="PRISMA ana sayfa">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 44 44" fill="none">
+            <path d="M22 5 40 36H4L22 5Z" fill="rgba(94,243,255,.09)" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M22 11 34 32H10L22 11Z" fill="rgba(154,123,255,.08)" stroke="rgba(255,255,255,.32)" stroke-width="1"/>
+            <path d="M1.5 24H18" stroke="#58f3ff" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M3 20.5H17" stroke="rgba(255,255,255,.55)" stroke-width=".9" stroke-linecap="round"/>
+            <path d="M30 21 43 16" stroke="#ff5fdc" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M30 26 43 31" stroke="#ffcf70" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="brand-text">
+          <strong>PRISMA</strong>
+          <small>Haftalık Işık Ligi</small>
+        </span>
+      </a>
+
+      <div class="week-pill" title="Yeni hafta her pazartesi 00:00 UTC'de başlar">
+        <span class="pulse-dot"></span>
+        <span id="weekLabel">—</span>
+        <span class="week-sep">/</span>
+        <span id="weekCountdown" class="mono">—</span>
+      </div>
+
+      <div class="top-actions">
+        <button class="icon-btn" id="soundBtn" type="button" aria-label="Sesi kapat" title="Ses">
+          <svg class="icon-sound-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+          <svg class="icon-sound-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="m16 9 5 6"/><path d="m21 9-5 6"/></svg>
+        </button>
+        <button class="btn btn-quiet" id="helpBtn" type="button">Nasıl oynanır</button>
+        <button class="btn btn-league" id="leagueBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg>
+          Lig
+        </button>
+      </div>
+    </header>
+
+    <main class="layout" id="gameLayout" aria-hidden="true" inert>
+      <aside class="panel side-panel stats-panel" aria-label="Oyun durumu">
+        <div class="panel-eyebrow">Bu hafta / sezon <span id="panelWeek">—</span></div>
+        <div class="score-block">
+          <span class="score-label">TOPLAM SKOR</span>
+          <span class="score-value mono" id="scoreValue">0</span>
+          <span class="score-delta mono" id="scoreDelta"></span>
+        </div>
+
+        <div class="level-progress">
+          <div class="level-progress-head">
+            <span>BÖLÜM</span>
+            <span><b id="levelNow">1</b> / 6</span>
+          </div>
+          <div class="level-dots" id="levelDots" aria-hidden="true"></div>
+        </div>
+
+        <div class="stat-list">
+          <div class="stat-row"><span>Tur</span><strong class="mono" id="turnStat">0 / 0</strong></div>
+          <div class="stat-row"><span>Kristal</span><strong class="mono" id="crystalStat">0 / 0</strong></div>
+          <div class="stat-row"><span>Par</span><strong class="mono" id="parStat">0</strong></div>
+          <div class="stat-row"><span>Seri</span><strong class="mono" id="streakStat">×0</strong></div>
+          <div class="stat-row"><span>Süre</span><strong class="mono" id="timeStat">00:00</strong></div>
+        </div>
+
+        <div class="stat-actions">
+          <button class="btn btn-soft" id="hintBtn" type="button">İpucu <span class="penalty">−150</span></button>
+          <button class="btn btn-soft" id="resetBtn" type="button">Sıfırla</button>
+        </div>
+        <div class="panel-note">
+          Aynaya dokun veya <kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> + <kbd>Enter</kbd>
+        </div>
+      </aside>
+
+      <section class="stage" aria-label="Bulmaca tahtası">
+        <div class="stage-head">
+          <div class="stage-title">
+            <div class="eyebrow" id="levelEyebrow">BÖLÜM 01</div>
+            <h1 id="levelTitle">İlk Kırılma</h1>
+          </div>
+          <div class="stage-chips">
+            <span class="chip"><i class="chip-dot cyan"></i><span id="chipTurns">Tur 0</span></span>
+            <span class="chip"><i class="chip-dot magenta"></i><span id="chipCrystals">0/0 kristal</span></span>
+          </div>
+        </div>
+
+        <div class="mobile-stats" aria-label="Mobil oyun durumu">
+          <div class="mstat"><span>SKOR</span><b class="mono" id="mScore">0</b></div>
+          <div class="mstat"><span>TUR</span><b class="mono" id="mTurns">0</b></div>
+          <div class="mstat"><span>KRİSTAL</span><b class="mono" id="mCrystals">0/0</b></div>
+          <div class="mstat"><span>SÜRE</span><b class="mono" id="mTime">00:00</b></div>
+          <div class="mstats-actions">
+            <button class="icon-btn small" id="mHintBtn" type="button" aria-label="İpucu" title="İpucu">?</button>
+            <button class="icon-btn small" id="mResetBtn" type="button" aria-label="Bölümü sıfırla" title="Sıfırla">↺</button>
+          </div>
+        </div>
+
+        <div class="board-frame" id="boardFrame">
+          <span class="frame-corner tl"></span>
+          <span class="frame-corner tr"></span>
+          <span class="frame-corner bl"></span>
+          <span class="frame-corner br"></span>
+          <canvas id="board" role="img" tabindex="0" aria-label="Işık bulmacası tahtası"></canvas>
+          <div class="board-toast" id="boardToast" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="stage-foot">
+          <div class="foot-status">
+            <span class="status-orb" id="statusOrb"></span>
+            <span id="statusText">Işını kristallere ulaştır</span>
+          </div>
+          <div class="legend" aria-hidden="true">
+            <span><i class="legend-mirror"></i>Ayna</span>
+            <span><i class="legend-crystal"></i>Kristal</span>
+            <span><i class="legend-emitter"></i>Kaynak</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel side-panel league-panel" aria-label="Haftalık lig özeti">
+        <div class="league-head">
+          <div>
+            <div class="panel-eyebrow">Haftalık lig</div>
+            <h2>Zirve</h2>
+          </div>
+          <button class="link-btn" type="button" data-open-league>Tümü</button>
+        </div>
+        <div class="mini-board" id="miniBoard"></div>
+        <div class="rank-card" id="rankCard">
+          <span class="rank-card-label">SIRALAMAN</span>
+          <strong class="mono" id="rankValue">—</strong>
+          <span id="rankHint">Henüz skor yok</span>
+        </div>
+        <div class="league-foot">
+          <span class="mode-pill" id="modePill">Yerel lig</span>
+          <span class="mono" id="leagueCountdown">—</span>
+        </div>
+        <button class="btn btn-outline full" type="button" data-open-league>Ligi aç</button>
+      </aside>
+    </main>
+  </div>
+
+  <div class="screen start-screen" id="startScreen">
+    <div class="start-grid" aria-hidden="true"></div>
+    <div class="start-content">
+      <div class="start-hero">
+        <div class="season-badge"><span class="pulse-dot"></span> SEZON 01 <span class="badge-sep"></span> <span id="startWeekNum">—</span></div>
+        <div class="hero-logo">
+          <span class="hero-mark" aria-hidden="true">
+            <svg viewBox="0 0 44 44" fill="none">
+              <path d="M22 5 40 36H4L22 5Z" fill="rgba(94,243,255,.1)" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+              <path d="M22 12 33 31H11L22 12Z" fill="rgba(154,123,255,.1)" stroke="rgba(255,255,255,.4)" stroke-width=".9"/>
+              <path d="M1 24H17" stroke="#58f3ff" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M31 21 43 15" stroke="#ff5fdc" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M31 26 43 31" stroke="#ffcf70" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <h1>PRISMA</h1>
+        </div>
+        <p class="hero-kicker">IŞIĞI BÜK. KRİSTALLERİ UYANDIR.</p>
+        <p class="hero-copy">Altı bölümlük sıra tabanlı ışık bulmacası. Aynaları döndür, ışını yönlendir, haftanın zirvesine yerleş.</p>
+
+        <form class="start-form" id="startForm" novalidate>
+          <label for="playerName">Oyuncu adı</label>
+          <div class="name-row">
+            <span class="name-prefix" aria-hidden="true">@</span>
+            <input id="playerName" name="playerName" maxlength="14" placeholder="Işıkçı" autocomplete="nickname" spellcheck="false" inputmode="text" />
+            <button id="startBtn" class="btn btn-primary btn-large" type="submit">
+              <span id="startBtnLabel">Haftayı Oyna</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+            </button>
+          </div>
+          <div class="start-form-foot">
+            <span id="resumeHint">Her hafta aynı altı bulmaca. Herkes aynı tahtada yarışır.</span>
+            <button class="link-btn" type="button" id="startHelpBtn">Nasıl oynanır?</button>
+          </div>
+          <button class="link-btn new-run" type="button" id="newRunBtn" hidden>Kayıtlı turu bırak, yeni başla</button>
+        </form>
+
+        <div class="start-meta">
+          <span class="pulse-dot"></span>
+          <span>Yeni hafta <b id="startCountdown" class="mono">—</b> sonra</span>
+          <span class="meta-sep"></span>
+          <span id="startWeekRange">—</span>
+        </div>
+
+        <div class="start-league">
+          <div class="start-league-head">
+            <span>BU HAFTANIN ZİRVESİ</span>
+            <button class="link-btn" type="button" data-open-league>Ligi gör</button>
+          </div>
+          <div id="startTop3" class="start-top3"></div>
+        </div>
+      </div>
+
+      <div class="start-visual" aria-hidden="true">
+        <div class="orbit orbit-1"></div>
+        <div class="orbit orbit-2"></div>
+        <div class="orbit orbit-3"></div>
+        <div class="prism-art">
+          <svg viewBox="0 0 520 520" fill="none">
+            <defs>
+              <radialGradient id="prismHalo" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(260 260) rotate(90) scale(210)">
+                <stop stop-color="#58f3ff" stop-opacity=".18"/>
+                <stop offset=".55" stop-color="#7a5cff" stop-opacity=".07"/>
+                <stop offset="1" stop-color="#050711" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="prismFace" x1="180" y1="160" x2="340" y2="360" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#58f3ff" stop-opacity=".3"/>
+                <stop offset=".5" stop-color="#9a7bff" stop-opacity=".14"/>
+                <stop offset="1" stop-color="#ff5fdc" stop-opacity=".24"/>
+              </linearGradient>
+              <linearGradient id="beamIn" x1="30" y1="260" x2="210" y2="260" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#58f3ff" stop-opacity="0"/>
+                <stop offset=".7" stop-color="#58f3ff" stop-opacity=".9"/>
+                <stop offset="1" stop-color="#ffffff"/>
+              </linearGradient>
+              <linearGradient id="beam1" x1="350" y1="250" x2="500" y2="160" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#ffffff"/>
+                <stop offset=".35" stop-color="#ff5fdc"/>
+                <stop offset="1" stop-color="#ff5fdc" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="beam2" x1="350" y1="260" x2="500" y2="260" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#ffffff"/>
+                <stop offset=".35" stop-color="#9a7bff"/>
+                <stop offset="1" stop-color="#9a7bff" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="beam3" x1="350" y1="270" x2="500" y2="370" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#ffffff"/>
+                <stop offset=".35" stop-color="#ffcf70"/>
+                <stop offset="1" stop-color="#ffcf70" stop-opacity="0"/>
+              </linearGradient>
+              <filter id="prismGlow" x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="9" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <filter id="softGlow" x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <circle cx="260" cy="260" r="210" fill="url(#prismHalo)"/>
+            <circle cx="260" cy="260" r="164" stroke="rgba(94,243,255,.12)" stroke-dasharray="2 11" class="spin-slow"/>
+            <circle cx="260" cy="260" r="198" stroke="rgba(255,95,220,.1)" stroke-dasharray="1 16" class="spin-reverse"/>
+            <path d="M30 260H205" stroke="url(#beamIn)" stroke-width="2.4" filter="url(#softGlow)"/>
+            <path d="M30 260H205" stroke="rgba(255,255,255,.55)" stroke-width=".8" class="beam-flicker"/>
+            <path d="M205 260 260 155 350 260 260 365 205 260Z" fill="url(#prismFace)" stroke="rgba(160,220,255,.55)" stroke-width="1.3" stroke-linejoin="round" filter="url(#prismGlow)"/>
+            <path d="M260 155 260 365" stroke="rgba(255,255,255,.22)" stroke-width="1"/>
+            <path d="M205 260 350 260" stroke="rgba(255,255,255,.16)" stroke-width="1"/>
+            <path d="M325 252 500 160" stroke="url(#beam1)" stroke-width="2.2" filter="url(#softGlow)"/>
+            <path d="M325 260 500 260" stroke="url(#beam2)" stroke-width="2.2" filter="url(#softGlow)"/>
+            <path d="M325 268 500 370" stroke="url(#beam3)" stroke-width="2.2" filter="url(#softGlow)"/>
+            <circle cx="205" cy="260" r="4" fill="#fff" filter="url(#softGlow)"/>
+            <circle cx="325" cy="260" r="4" fill="#fff" filter="url(#softGlow)"/>
+            <circle cx="260" cy="155" r="3" fill="#8ff8ff" filter="url(#softGlow)"/>
+            <circle cx="350" cy="260" r="3" fill="#ffbd6b" filter="url(#softGlow)"/>
+          </svg>
+        </div>
+        <div class="float-card float-a">
+          <span class="float-icon">↻</span>
+          <span><small>TUR</small><b class="mono">04</b></span>
+        </div>
+        <div class="float-card float-b">
+          <span class="float-icon amber">✦</span>
+          <span><small>SERİ</small><b class="mono">×3</b></span>
+        </div>
+        <div class="float-card float-c">
+          <span class="float-icon magenta">◈</span>
+          <span><small>SKOR</small><b class="mono">7.840</b></span>
+        </div>
+      </div>
+    </div>
+    <div class="start-footer">
+      <span>PRISMA · SEZON 01</span>
+      <span class="meta-sep"></span>
+      <span>Sıra tabanlı bulmaca</span>
+      <span class="meta-sep"></span>
+      <span>6 bölüm / hafta</span>
+    </div>
+  </div>
+
+  <div class="modal-root" id="modalRoot" hidden>
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-card" id="modalCard" role="dialog" aria-modal="true" aria-labelledby="modalTitle"></div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <canvas class="fx-canvas" id="fxCanvas" aria-hidden="true"></canvas>
+  <div class="sr-only" id="srLive" aria-live="polite"></div>
+
+  <template id="iconClose">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12"/><path d="m18 6-12 12"/></svg>
+  </template>
+
+  <!-- Online lig: `node server/leaderboard-server.mjs` çalıştırıp sayfayı
+       ?online=1 ile açın. Alternatif olarak app.js'den önce şunu ekleyin:
+       <script>window.PRISMA_CONFIG = { leaderboardApi: '/api/leaderboard' }</script> -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
