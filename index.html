@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#060a11" />
+    <meta
+      name="description"
+      content="Kor Labirenti — sıra tabanlı 2D bulmaca oyunu. Korları topla, ocağı uyandır ve haftalık çevrimiçi sıralamada yarış."
+    />
+    <title>Kor Labirenti — Haftalık Bulmaca Seferi</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3CradialGradient id='g'%3E%3Cstop stop-color='%23fff6d8'/%3E%3Cstop offset='.45' stop-color='%23ffbd5c'/%3E%3Cstop offset='1' stop-color='%23ff6a1a'/%3E%3C/radialGradient%3E%3Ccircle cx='32' cy='32' r='24' fill='url(%23g)'/%3E%3C/svg%3E" />
+    <link rel="preload" href="assets/fonts/cinzel-latin-ext.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="assets/fonts/manrope-latin-ext.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="ambient" aria-hidden="true">
+      <div class="ambient-orb orb-amber"></div>
+      <div class="ambient-orb orb-teal"></div>
+      <div class="ambient-orb orb-violet"></div>
+      <div class="ambient-grid"></div>
+      <div class="ambient-noise"></div>
+    </div>
+
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" role="img">
+              <defs>
+                <radialGradient id="sparkGradient" cx="50%" cy="45%" r="55%">
+                  <stop offset="0%" stop-color="#fff8dd" />
+                  <stop offset="42%" stop-color="#ffce79" />
+                  <stop offset="100%" stop-color="#ff6a1a" />
+                </radialGradient>
+              </defs>
+              <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(255,180,90,.24)" stroke-width="1" />
+              <circle cx="24" cy="24" r="14" fill="none" stroke="rgba(255,180,90,.4)" stroke-width="1" stroke-dasharray="3 5" />
+              <path d="M24 7 L27.4 19.2 L40 24 L27.4 28.8 L24 41 L20.6 28.8 L8 24 L20.6 19.2 Z" fill="url(#sparkGradient)" />
+              <circle cx="24" cy="24" r="4.5" fill="#fff8e8" />
+            </svg>
+          </div>
+          <div class="brand-copy">
+            <h1>KOR LABİRENTİ</h1>
+            <p>Haftalık sıra tabanlı bulmaca seferi</p>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="season-chip" id="season-chip">
+            <span class="season-dot" aria-hidden="true"></span>
+            <span id="season-label">44. Hafta</span>
+            <span class="season-sep" aria-hidden="true">·</span>
+            <span id="season-countdown">3g 12sa</span>
+          </div>
+          <div class="net-status is-offline" id="net-status" title="Haftalık sıralama bağlantısı">
+            <span class="net-dot" aria-hidden="true"></span>
+            <span id="net-label">Yerel</span>
+          </div>
+          <button class="icon-btn" id="sound-btn" type="button" aria-label="Sesi kapat" title="Ses">
+            <svg class="icon-sound" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor" />
+              <path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+            </svg>
+            <svg class="icon-muted" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor" />
+              <path d="m16 9 5 6m0-6-5 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+            </svg>
+          </button>
+          <button class="icon-btn" id="help-btn" type="button" aria-label="Nasıl oynanır?" title="Nasıl oynanır?">
+            <span class="question-mark">?</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="panel board-panel" aria-label="Oyun tahtası">
+          <div class="board-head">
+            <div class="level-meta">
+              <div class="level-kicker">
+                <span class="mode-pill" id="mode-pill">HAFTALIK</span>
+                <span class="level-index" id="level-index">01 / 05</span>
+              </div>
+              <h2 id="level-name">Köz Yolu</h2>
+              <p id="level-sub">Korları topla. Ocağı uyandır. Karanlıktan çık.</p>
+            </div>
+            <div class="run-stats">
+              <div class="stat">
+                <span id="turn-count">0</span>
+                <small>TUR</small>
+              </div>
+              <div class="stat">
+                <span id="move-count">0</span>
+                <small>HAMLE</small>
+              </div>
+              <div class="stat cans-stat" id="cans-stat">
+                <span id="cans-value">3</span>
+                <small>CAN</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="board-wrap" id="board-wrap">
+            <canvas id="board" aria-label="Kor Labirenti oyun tahtası. Ok tuşları, WASD veya kaydırma ile hareket et."></canvas>
+            <div class="chain-badge" id="chain-badge" aria-live="polite">
+              <span class="chain-icon" aria-hidden="true">✦</span>
+              <span><strong id="chain-value">2</strong>× zincir</span>
+            </div>
+            <div class="board-corner-hint" id="board-hint">Kaydır veya okları kullan</div>
+          </div>
+
+          <div class="board-foot">
+            <div class="objective-row">
+              <div class="objective-chip" id="objective-ember">
+                <span class="objective-icon ember-icon" aria-hidden="true"></span>
+                <span><strong id="ember-count">0</strong> / <span id="ember-total">3</span> kor</span>
+              </div>
+              <div class="objective-chip" id="objective-exit">
+                <span class="objective-icon exit-icon" aria-hidden="true"></span>
+                <span id="exit-label">Ocak kapalı</span>
+              </div>
+            </div>
+            <div class="board-actions">
+              <button class="text-btn" id="undo-btn" type="button" title="Geri al (Z)">
+                <span aria-hidden="true">↶</span> Geri Al <kbd>Z</kbd>
+              </button>
+              <button class="text-btn" id="restart-btn" type="button" title="Bölümü sıfırla (R)">
+                <span aria-hidden="true">↻</span> Sıfırla <kbd>R</kbd>
+              </button>
+            </div>
+          </div>
+
+          <div class="dpad" id="dpad" aria-label="Yön kontrolleri">
+            <button class="dpad-btn up" data-action="up" type="button" aria-label="Yukarı">↑</button>
+            <button class="dpad-btn left" data-action="left" type="button" aria-label="Sol">←</button>
+            <button class="dpad-btn wait" data-action="wait" type="button" aria-label="Bekle">bekle</button>
+            <button class="dpad-btn right" data-action="right" type="button" aria-label="Sağ">→</button>
+            <button class="dpad-btn down" data-action="down" type="button" aria-label="Aşağı">↓</button>
+          </div>
+        </section>
+
+        <aside class="side">
+          <section class="panel mission-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">GÖREV</span>
+                <h3 id="mission-title">Ocağı uyandır</h3>
+              </div>
+              <div class="mission-score" title="Bu bölümden kazanabileceğin puan">
+                <span id="score-preview">0</span>
+                <small>puan</small>
+              </div>
+            </div>
+            <ul class="mission-list">
+              <li id="mission-embers">
+                <span class="mission-bullet" aria-hidden="true"></span>
+                <span>Tüm korları topla <strong id="mission-ember-count">0/3</strong></span>
+              </li>
+              <li id="mission-exit">
+                <span class="mission-bullet" aria-hidden="true"></span>
+                <span>Yanan ocağa ulaş <strong id="mission-exit-state">kilitli</strong></span>
+              </li>
+              <li id="mission-par">
+                <span class="mission-bullet" aria-hidden="true"></span>
+                <span>Hedef: <strong id="mission-par-value">22</strong> hamle veya altı</span>
+              </li>
+            </ul>
+            <div class="chain-meter">
+              <div class="chain-meter-head">
+                <span>Zincir</span>
+                <span id="chain-meter-value">0</span>
+              </div>
+              <div class="chain-track"><span id="chain-meter-fill"></span></div>
+              <p>Ardışık kor toplamalar puanını büyütür.</p>
+            </div>
+            <div class="level-dots" id="level-dots" aria-label="Sefer ilerlemesi"></div>
+          </section>
+
+          <section class="panel leaderboard-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">ÇEVRİMİÇİ</span>
+                <h3>Haftalık Sıralama</h3>
+              </div>
+              <span class="week-badge" id="lb-week">2026-W44</span>
+            </div>
+            <div class="lb-tabs" role="tablist" aria-label="Sıralama türü">
+              <button class="lb-tab is-active" id="tab-weekly" type="button" role="tab" aria-selected="true">Haftalık</button>
+              <button class="lb-tab" id="tab-campaign" type="button" role="tab" aria-selected="false">Kampanya</button>
+            </div>
+            <div class="lb-list" id="leaderboard-list" aria-live="polite"></div>
+            <div class="lb-legend">
+              <span><span class="legend-ghost" aria-hidden="true">◇</span> Hayalet skorlar sezonun referans rakipleridir.</span>
+            </div>
+            <div class="lb-footer">
+              <span class="lb-sync" id="lb-sync">
+                <span class="sync-dot" aria-hidden="true"></span>
+                <span id="lb-sync-label">Yerel kayıt</span>
+              </span>
+              <button class="text-btn small" id="refresh-lb" type="button">Yenile</button>
+            </div>
+          </section>
+
+          <section class="panel tip-panel" id="tip-panel">
+            <span class="tip-mark" aria-hidden="true">✦</span>
+            <p id="tip-text">Buz üzerinde tek bir hamle seni birkaç kare kaydırabilir. Duvarları hesaba kat.</p>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="site-foot">
+        <span>Her hafta yeni labirent · Pazartesi 00:00 UTC'de sıfırlanır</span>
+        <span class="foot-sep" aria-hidden="true">·</span>
+        <button class="link-btn" id="name-btn" type="button">Adını düzenle</button>
+      </footer>
+    </div>
+
+    <div class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+      <div class="intro-card">
+        <div class="intro-ornament" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <span class="eyebrow intro-eyebrow" id="intro-season">SEZON 44 · HAFTALIK MEYDAN OKUMA</span>
+        <h2 id="intro-title">Karanlıkta bir <em>kıvılcım</em>.</h2>
+        <p class="intro-lead">
+          Korları topla, ocağı uyandır, labirentten çık. Her hamle bir tur; her tur yeni bir sır.
+          Beş bölümlük haftalık seferde en yüksek puanı topla.
+        </p>
+        <div class="intro-features">
+          <span><i class="feature-dot amber" aria-hidden="true"></i> Sıra tabanlı bulmaca</span>
+          <span><i class="feature-dot teal" aria-hidden="true"></i> Her hafta yeni labirent</span>
+          <span><i class="feature-dot violet" aria-hidden="true"></i> Canlı sıralama</span>
+        </div>
+        <div class="intro-actions">
+          <button class="btn btn-primary" id="intro-weekly" type="button" aria-label="Play">
+            <span>Haftalık Meydan Okuma</span>
+            <span class="btn-arrow" aria-hidden="true">→</span>
+          </button>
+          <button class="btn btn-ghost" id="intro-campaign" type="button">Kampanya</button>
+        </div>
+        <div class="intro-meta">
+          <span id="intro-countdown">Yeni sezona 3g 12sa</span>
+          <span class="meta-sep" aria-hidden="true">·</span>
+          <button class="link-btn" id="intro-help" type="button">Nasıl oynanır?</button>
+        </div>
+      </div>
+      <div class="intro-side" aria-hidden="true">
+        <div class="intro-side-ring ring-one"></div>
+        <div class="intro-side-ring ring-two"></div>
+        <div class="intro-side-spark"></div>
+        <div class="intro-side-caption">Her hamle bir karar.<br />Her kor bir sır.</div>
+      </div>
+    </div>
+
+    <div id="modal-root"></div>
+    <div id="toast-root" class="toast-root" aria-live="polite"></div>
+
+    <script src="src/vendor/mqtt.min.js"></script>
+    <script type="module" src="src/main.js"></script>
+  </body>
+</html>
